@@ -1,0 +1,20 @@
+.checkbox_container {
+  max-width: 380px;
+  height: 100%;
+  display: flex;
+  /*justify-content: center;*/
+  align-items: center;
+}
+
+.checkbox {
+  height: 18px;
+  width: 18px;
+  color: black;
+}
+
+.label {
+  display: block;
+  font-size: 1rem;
+  color: black;
+  margin-left: 25px;
+}

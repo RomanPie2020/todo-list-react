@@ -1,0 +1,23 @@
+.posts {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 5px 10px;
+}
+
+.post {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  max-width: 500px;
+  width: 100%;
+  height: 50px;
+  border: 2px solid teal;
+  margin-top: 5px;
+}
+
+.post_delete_btn {
+
+}
