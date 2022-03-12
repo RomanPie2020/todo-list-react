@@ -34,7 +34,7 @@ const Posts = ({
     )
   }
 
-  function checkTypeOfRendering() {
+  const checkTypeOfRendering = () => {
     if (posts.length === 0) {
       return <h4>Post list is empty!</h4>
     } else {

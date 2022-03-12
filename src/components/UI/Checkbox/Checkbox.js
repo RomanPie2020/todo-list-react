@@ -5,7 +5,7 @@ const Checkbox = ({ index, post, setCheckedCounter, posts, searchedPosts, search
   const label = useRef();
   const checkbox = useRef();
 
-  const checkForPostsInstalling = useEffect(() => {
+  useEffect(() => {
     if (post.checked === true) {
       label.current.style.textDecoration = 'line-through'
       checkbox.current.checked = true
@@ -14,7 +14,7 @@ const Checkbox = ({ index, post, setCheckedCounter, posts, searchedPosts, search
       label.current.style.textDecoration = 'none'
       checkbox.current.checked = false
     }
-  }, [posts, searchedPosts, searchedAndFilteredPosts]);
+  }, [posts, searchedPosts, searchedAndFilteredPosts])
 
   const checkBoxHandler = (e) => {
     if (post.checked === true) {
@@ -22,13 +22,13 @@ const Checkbox = ({ index, post, setCheckedCounter, posts, searchedPosts, search
       console.log(checkbox.current.checked)
       // checkbox.current.checked = false
       post.checked = false
-      setCheckedCounter(s => s - 1)
+      setCheckedCounter(-1)
 
     } else {
       label.current.style.textDecoration = 'line-through'
       post.checked = true
       // checkbox.current.checked = true
-      setCheckedCounter(s => s + 1)
+      setCheckedCounter(1)
     }
     console.log(posts)
   }

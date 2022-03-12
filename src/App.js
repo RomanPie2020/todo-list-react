@@ -1,31 +1,36 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import AddPost from "./components/AddPost/AddPost";
 import Posts from "./components/Posts/Posts";
 import css from './App.module.css'
 import MySelect from "./components/UI/MySelect/MySelect";
 import Input from "./components/UI/Input/Input";
+import {useDispatch, useSelector} from "react-redux";
+import {
+  addPostInputChangeAction,
+  setCheckedCounterAction,
+  setFiltrationTypeAction,
+  setPostsAction,
+  setSearchedAndFilteredPostsAction,
+  setSearchedPostsAction,
+  setSearchTextAction,
+  setSelectedSortAction
+} from "./store";
 
-function App() {
-  const [text, setText] = useState('')
-  const [posts, setPosts] = useState([
-    {id: 324, text: 't1', checked: false},
-    {id: 323, text: 't2', checked: false},
-    {id: 322, text: 't3', checked: false},
-  ])
-  const [checkedCounter, setCheckedCounter] = useState(0);
-  const [selectedSort, setSelectedSort] = useState('');
-  const [searchText, setSearchText] = useState('');
-  const [searchedPosts, setSearchedPosts] = useState('');
-  const [filtrationType, setFiltrationType] = useState('');
-  const [filterOptions, setFilterOptions] = useState([
-    {value: 'all', name: 'all'},
-    {value: 'checked', name: 'checked'},
-    {value: 'unchecked', name: 'unchecked'},
-  ])
-  const [searchedAndFilteredPosts, setSearchedAndFilteredPosts] = useState('');
+const App = () => {
+  const dispatch = useDispatch()
+  const text = useSelector(state => state.text)
+  const posts = useSelector(state => state.posts)
+  const checkedCounter = useSelector(state => state.checkedCounter)
+  const selectedSort = useSelector(state => state.selectedSort)
+  const searchText = useSelector(state => state.searchText)
+  const searchedPosts = useSelector(state => state.searchedPosts)
+  const filtrationType = useSelector(state => state.filtrationType)
+  const filterOptions = useSelector(state => state.filterOptions)
+  const searchedAndFilteredPosts = useSelector(state => state.searchedAndFilteredPosts)
+  console.log(text)
 
-  const changeHandler = val => {
-    setText(val)
+  const addPostInputHandler = val => {
+    dispatch(addPostInputChangeAction(val))
   }
 
   const addPost = () => {
@@ -41,8 +46,19 @@ function App() {
       text,
       checked: false
     }
-    setPosts([...posts, newPost]);
-    setText('')
+    dispatch(setPostsAction([...posts, newPost]))
+    if (searchText == newPost.text) {
+      dispatch(setSearchedPostsAction([...searchedPosts, newPost]))
+    }
+    if (searchedAndFilteredPosts) {
+      dispatch(setSearchedAndFilteredPostsAction([...searchedAndFilteredPosts, newPost]))
+    }
+    dispatch(addPostInputChangeAction(''))
+    console.log(searchedAndFilteredPosts)
+  }
+
+  const setCheckedCounter = (val) => {
+      dispatch(setCheckedCounterAction(val))
   }
 
   const enterKeyAdd = (key) => {
@@ -53,19 +69,17 @@ function App() {
 
   const deletePost = (post) => {
     if (post.checked === true) {
-      setCheckedCounter(s => s - 1)
+      setCheckedCounter(-1)
     }
+    dispatch(setPostsAction(posts.filter(p => p.id !== post.id)))
     if (searchedAndFilteredPosts) {
-      setSearchedAndFilteredPosts(searchedAndFilteredPosts.filter(p => p.id !== post.id))
-      setSearchedPosts(searchedPosts.filter(p => p.id !== post.id))
-      setPosts(posts.filter(p => p.id !== post.id))
-    } else if (searchedPosts) {
-      setSearchedPosts(searchedPosts.filter(p => p.id !== post.id))
-      setPosts(posts.filter(p => p.id !== post.id))
-    } else {
-      setPosts(posts.filter(p => p.id !== post.id))
+      dispatch(
+        setSearchedAndFilteredPostsAction(searchedAndFilteredPosts.filter(p => p.id !== post.id))
+      )
     }
-
+    if (searchedPosts) {
+      dispatch(setSearchedPostsAction(searchedPosts.filter(p => p.id !== post.id)))
+    }
   }
 
   const dateSorting = (sort) => {
@@ -90,44 +104,51 @@ function App() {
   }
 
   const sortPosts = (sort) => {
-    setSelectedSort(sort)
+    dispatch(setSelectedSortAction(sort))
     if (searchedPosts) {
       if (sort === 'text') {
-        setSearchedPosts(nameSorting(sort))
+        dispatch(setSearchedPostsAction(nameSorting(sort)))
       }
       if (sort === 'id') {
-        setSearchedPosts(dateSorting(sort))
+        dispatch(setSearchedPostsAction(dateSorting(sort)))
+      }
+    } else if (searchedAndFilteredPosts) {
+      if (sort === 'text') {
+        dispatch(setSearchedAndFilteredPostsAction(nameSorting(sort)))
+
+      }
+      if (sort === 'id') {
+        dispatch(setSearchedAndFilteredPostsAction(dateSorting(sort)))
       }
     } else {
       if (sort === 'text') {
-        setPosts(nameSorting(sort))
+        dispatch(setPostsAction((nameSorting(sort))))
       }
       if (sort === 'id') {
-        setPosts(dateSorting(sort))
+        dispatch(setPostsAction((dateSorting(sort))))
       }
     }
 
   }
 
   const searchTextHandler = (value) => {
-    setSearchText(value)
+    dispatch(setSearchTextAction(value))
     // console.log(value)
     if (value == '') {
-      setSearchedPosts('')
+      dispatch(setSearchedPostsAction(''))
       return
     }
     if (searchedAndFilteredPosts) {
-      setSearchedPosts(
+      dispatch(setSearchedPostsAction(
         [...searchedAndFilteredPosts]
           .filter(post => post.text.toLowerCase().includes(value.toLowerCase()))
-      )
+      ))
     } else {
-      setSearchedPosts(
+      dispatch(setSearchedPostsAction(
         [...posts]
           .filter(post => post.text.toLowerCase().includes(value.toLowerCase()))
-      )
+      ))
     }
-
   }
 
   function filteredAndSearchPosts(posts, value) {
@@ -142,25 +163,13 @@ function App() {
   }
 
   const filtrationTypeHandler = (value) => {
-    setFiltrationType(value)
+    dispatch(setFiltrationTypeAction(value))
+
     if (searchedPosts.length !== 0) {
-      setSearchedAndFilteredPosts(filteredAndSearchPosts(searchedPosts, value))
-      // setSearchedAndFilteredPosts([
-      //   {id: 14312, text: 'fasdf'}
-      //   ]
-      // )
-
+      dispatch(setSearchedAndFilteredPostsAction(filteredAndSearchPosts(searchedPosts, value)))
     } else {
-      setSearchedAndFilteredPosts(filteredAndSearchPosts(posts, value))
-      // setSearchedAndFilteredPosts([
-      //     {id: 14312, text: 'fasdf'}
-      //   ]
-      // )
+      dispatch(setSearchedAndFilteredPostsAction(filteredAndSearchPosts(posts, value)))
     }
-
-    console.log(posts)
-    console.log(searchedPosts)
-    // console.log(searchedAndFilteredPosts)
   }
 
   return (
@@ -168,7 +177,7 @@ function App() {
       <h6 className={css.title}>Post list</h6>
       <AddPost
         onKeyDown={enterKeyAdd}
-        onChange={changeHandler}
+        onChange={addPostInputHandler}
         onClick={addPost}
         text={text}
       />
